@@ -1,9 +1,6 @@
 # Modelo de datos (Firebase Realtime Database)
 
-Ruta raíz:
-- `/app/{uid}/...`
-
-Dentro del `uid` existe contenido para dos perfiles: `sergio` y `scarlett`.
+Ruta raíz: `/app/{uid}/...`. Dentro del `uid` viven los dos perfiles fijos (`sergio`, `scarlett`).
 
 ## Árbol propuesto
 
@@ -111,11 +108,89 @@ Dentro del `uid` existe contenido para dos perfiles: `sergio` y `scarlett`.
 }
 ```
 
+## Ejemplo simplificado (perfil Sergio)
+
+```json
+{
+  "app": {
+    "abcUid": {
+      "activeSeason": { "sergio": "seasonA" },
+      "seasons": {
+        "sergio": { "seasonA": { "name": "Hipertrofia Q4", "createdAt": 1730500000000 } }
+      },
+      "workouts": {
+        "sergio": {
+          "seasonA": {
+            "w1": { "name": "Upper 1", "order": 1 },
+            "w2": { "name": "Lower 1", "order": 2 }
+          }
+        }
+      },
+      "workoutItems": {
+        "sergio": {
+          "seasonA": {
+            "w1": {
+              "bp": { "type": "strength", "name": "Bench Press", "order": 1, "setsTarget": 3, "repsMin": 8, "repsMax": 12 },
+              "cardio": { "type": "cardio", "name": "Bike", "order": 2 }
+            },
+            "w2": {
+              "sq": { "type": "strength", "name": "Back Squat", "order": 1, "setsTarget": 4, "repsMin": 6, "repsMax": 10 },
+              "sauna": { "type": "sauna", "name": "Sauna", "order": 2 }
+            }
+          }
+        }
+      },
+      "sessions": {
+        "sergio": {
+          "seasonA": {
+            "sess1": { "workoutId": "w1", "startedAt": 1730570000000, "endedAt": 1730571800000, "notes": "" }
+          }
+        }
+      },
+      "strengthSets": {
+        "sergio": {
+          "seasonA": {
+            "sess1": {
+              "bp": {
+                "1": { "weightLb": 135, "reps": 10 },
+                "2": { "weightLb": 145, "reps": 8 },
+                "3": { "weightLb": 145, "reps": 7 }
+              }
+            }
+          }
+        }
+      },
+      "sessionCardio": {
+        "sergio": {
+          "seasonA": {
+            "sess1": {
+              "cardio": { "minutes": 12, "notes": "resistencia" }
+            }
+          }
+        }
+      },
+      "sessionSauna": {
+        "sergio": {
+          "seasonA": {
+            "sess1": {
+              "sauna": { "minutes": 10, "notes": "" }
+            }
+          }
+        }
+      },
+      "progress": {
+        "sergio": { "seasonA": { "lastWorkoutId": "w1", "lastSessionId": "sess1" } }
+      }
+    }
+  }
+}
+```
+
 ## Reglas de negocio (resumen)
 - Temporadas independientes: no heredan pesos entre temporadas.
 - Programa B2: workouts ordenados por `order` y se recorren en loop.
 - “Hoy”: depende de `progress` (último workout completado) y no del calendario.
-- Strength: registrar weightLb y reps por set. Sets totales = cantidad de sets guardados.
+- Strength: registrar `weightLb` y `reps` por set. Sets totales = cantidad de sets guardados.
 - Cardio, Swim, Sauna: registrar métricas por sesión.
 
 ## Cálculo de “Hoy” (B2 loop)
