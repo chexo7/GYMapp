@@ -1,333 +1,574 @@
 'use client';
 
-import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
-const IMAGE_MAP = {
-  hero: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSnQA4K3uVHyRUslz7LaUyzqFcKFdQzwK1K0rNGupWFDGDFPjC8SHzGjKVOlQWGekc98JRvqm4IxjPk-JmWu0Jn7S0tTjhFZvstbjDIFia-GTs3TYJsrHovw1U65_HwIag8nRTppBt9R7uA1gvMN0qPX6JxfmsmHDzD9CR7sQ71QhMj1ZA',
-  sergio: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSk6omJ7zVXuKmv8xm3evVv33Ka_PCLwht9IcqUinqrJhoeniZdRHujCGNJVKbiknxsZREDKy3lEmmhCmkLW6VbYWQqjWxTj5TTcQmKmwtuRKzqCuC2ln2Dr2AKZ-WhAq_N8b4jdIUQFgRHHNsJatU6yyoT-SmGxsblkYBy6as2QeBoKvQ',
-  scarlett: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSld3DSgZ853agAlBmmuyn1U_U9tB4UWczqbaJL-7PnYV32j8WhKsuqrbuzqAT7n5_99-8_3d0oCRCGHYb6jje-8e1pm0j5TgyozaGi73UfAXO3vJBuCvOTirWLSN-zQYGjl2GtoyyTHDOvhrG4WUarhsidQoViC1MalyhsAhu8rl9QSjA',
-  workoutA: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSl2qPzkdGgGaWKh7PF882zcPd94nSde2bpAgKb6UGSYIVAYHyOWXHjG5HAHKnWHas2srd4biyO0-6x-WMTzAy6Z0p-RRNhDCR1XrA_29EXln6Z1KufIeuwwrKYn7wQpWXLAcOmIeY8Ug4o63W9LcCrfQ7XjlQhSiN2nhFpZuErlu5wI6Q',
-  workoutB: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSklKpVNZGoDzCM0tUga8QacmuoZIfivamJOgecaWe-dUsRkmmEVv1RktSPvbC8De7s4OykDI0O5G_OIx0ouTWfSkbGusa3hNV4stdrLSYE4QlsLl7zSOhHTcWjc6hpZgeqGxXahus3tk278IPksDtZ7u_J20FVRvI8ANutYRXMZTJ_Fsg',
-  workoutC: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSldj9Wpg7M6ZKptu5KUkQ8x0Qvx2NxzgRm2RaO-J-o8db2gcmWtMabxG582E7HGlgJcHdWxWDSKrwHU4yjanYmyC7lrY11_0JDR0A7gqrVG1G6j2-bqrcE2IWigt3mA7DCkQ-2Cr1YPxTU_RiiJb40qd2ubgDQ-SjH-YDuCfHTrNezE',
-  workoutD: 'https://lh3.googleusercontent.com/gg-dl/ABS2GSn5KK3Cy8_rHSjuTH1fw59j8fw-Ls3BMBd-1KYRv7fPGP6DIISbKdbZMmTgltuM0gx_U0exI9nVbjrXyudEwOo9ekBBs9R21_Kk_n_eEAqrGh-n6n-FwpnTlP0I38qKf4OVznNNLpt0ArfU955jz1jIXam3Gi_O3le9t7zJs2cxQwzMJQ',
-};
+const PROFILES = [
+  { id: 'sergio', name: 'Sergio' },
+  { id: 'scarlett', name: 'Scarlett' },
+];
 
-const USERS = {
-  sergio: {
-    id: 'sergio',
-    name: 'Sergio',
-    avatarUrl: IMAGE_MAP.sergio,
-  },
-  scarlett: {
-    id: 'scarlett',
-    name: 'Scarlett',
-    avatarUrl: IMAGE_MAP.scarlett,
-  },
-};
-
-const SEASON_DATA = {
-  id: 'winter_2024',
-  title: 'Winter Arc 2024',
-  sequence: ['A', 'B', 'C', 'D'],
-  workouts: {
-    A: {
-      id: 'A',
-      name: 'Upper Power',
-      type: 'Strength',
-      img: IMAGE_MAP.workoutA,
-      exercises: ['Barbell Bench Press', 'Pendlay Row', 'Overhead Press', 'Weighted Pull Ups'],
-    },
-    B: {
-      id: 'B',
-      name: 'Lower Power',
-      type: 'Strength',
-      img: IMAGE_MAP.workoutB,
-      exercises: ['Back Squat', 'Romanian Deadlift', 'Leg Press', 'Calf Raises'],
-    },
-    C: {
-      id: 'C',
-      name: 'Full Body Hypertrophy',
-      type: 'Strength',
-      img: IMAGE_MAP.workoutC,
-      exercises: ['Incline DB Press', 'Bulgarian Split Squat', 'Lat Pulldown', 'Lateral Raises'],
-    },
-    D: {
-      id: 'D',
-      name: 'Cardio & Recovery',
-      type: 'Cardio',
-      img: IMAGE_MAP.workoutD,
-      exercises: ['Freestyle Swim', 'Sauna Recovery'],
+const BASE_SEASONS = [
+  {
+    id: 'fuerza-1-sergio',
+    profileId: 'sergio',
+    title: 'Fuerza 1',
+    active: true,
+    sequence: ['upper1', 'lower1', 'swim1'],
+    workouts: {
+      upper1: {
+        id: 'upper1',
+        name: 'Upper 1',
+        items: [
+          { id: 'bench', type: 'strength', title: 'Bench Press', sets: 3, reps: '8-12' },
+          { id: 'row', type: 'strength', title: 'Row', sets: 3, reps: '8-12' },
+          { id: 'cardio', type: 'cardio', title: 'Treadmill', target: 'Opcional' },
+          { id: 'sauna', type: 'sauna', title: 'Sauna', target: 'Opcional' },
+        ],
+      },
+      lower1: {
+        id: 'lower1',
+        name: 'Lower 1',
+        items: [
+          { id: 'squat', type: 'strength', title: 'Back Squat', sets: 3, reps: '8-12' },
+          { id: 'rdl', type: 'strength', title: 'RDL', sets: 3, reps: '8-12' },
+          { id: 'bike', type: 'cardio', title: 'Bike', target: 'Opcional' },
+          { id: 'sauna', type: 'sauna', title: 'Sauna', target: 'Opcional' },
+        ],
+      },
+      swim1: {
+        id: 'swim1',
+        name: 'Swim 1',
+        items: [
+          { id: 'swim', type: 'swim', title: 'Swim', target: 'Opcional' },
+          { id: 'sauna', type: 'sauna', title: 'Sauna', target: 'Opcional' },
+        ],
+      },
     },
   },
-};
+  {
+    id: 'base-nov-scarlett',
+    profileId: 'scarlett',
+    title: 'Base Noviembre',
+    active: true,
+    sequence: ['upper1', 'lower1', 'swim1'],
+    workouts: {
+      upper1: {
+        id: 'upper1',
+        name: 'Upper 1',
+        items: [
+          { id: 'bench', type: 'strength', title: 'Bench Press', sets: 3, reps: '8-12' },
+          { id: 'row', type: 'strength', title: 'Row', sets: 3, reps: '8-12' },
+          { id: 'cardio', type: 'cardio', title: 'Treadmill', target: 'Opcional' },
+        ],
+      },
+      lower1: {
+        id: 'lower1',
+        name: 'Lower 1',
+        items: [
+          { id: 'lunge', type: 'strength', title: 'Lunges', sets: 3, reps: '10-12' },
+          { id: 'deadlift', type: 'strength', title: 'Deadlift', sets: 3, reps: '6-8' },
+          { id: 'bike', type: 'cardio', title: 'Bike', target: 'Opcional' },
+        ],
+      },
+      swim1: {
+        id: 'swim1',
+        name: 'Swim 1',
+        items: [
+          { id: 'swim', type: 'swim', title: 'Swim', target: 'Opcional' },
+          { id: 'sauna', type: 'sauna', title: 'Sauna', target: 'Opcional' },
+        ],
+      },
+    },
+  },
+];
 
 const initialLogs = [
-  { id: 1, userId: 'sergio', workoutId: 'A', date: Date.now() - 86400000 * 3, summary: 'Bench 225x5' },
-  { id: 2, userId: 'scarlett', workoutId: 'C', date: Date.now() - 86400000 * 1, summary: 'Good session' },
+  { id: '1', profileId: 'sergio', seasonId: 'fuerza-1-sergio', workoutId: 'upper1', date: Date.now() - 86400000 * 2 },
+  { id: '2', profileId: 'sergio', seasonId: 'fuerza-1-sergio', workoutId: 'lower1', date: Date.now() - 86400000 * 4 },
+  { id: '3', profileId: 'scarlett', seasonId: 'base-nov-scarlett', workoutId: 'swim1', date: Date.now() - 86400000 * 1 },
 ];
 
 function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleDateString('es-US', {
+  return new Date(timestamp).toLocaleDateString('es-MX', {
     month: 'short',
     day: 'numeric',
   });
 }
 
 export default function HomePage() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [view, setView] = useState('login');
-  const [logs, setLogs] = useState(initialLogs);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profileId, setProfileId] = useState(PROFILES[0].id);
+  const [view, setView] = useState('today');
+  const [seasons, setSeasons] = useState(BASE_SEASONS);
   const [activeSession, setActiveSession] = useState(null);
+  const [logs, setLogs] = useState(initialLogs);
+  const [progress, setProgress] = useState({});
+  const [selectedSeasonId, setSelectedSeasonId] = useState(null);
 
-  const userLogs = useMemo(() => {
-    if (!currentUser) return [];
-    return [...logs]
-      .filter((log) => log.userId === currentUser.id)
-      .sort((a, b) => b.date - a.date);
-  }, [logs, currentUser]);
+  const profile = PROFILES.find((p) => p.id === profileId);
+  const profileSeasons = useMemo(
+    () => seasons.filter((season) => season.profileId === profileId),
+    [seasons, profileId],
+  );
+
+  const activeSeason = useMemo(
+    () => profileSeasons.find((season) => season.active) || null,
+    [profileSeasons],
+  );
+
+  const currentProgress = progress[profileId];
 
   const nextWorkout = useMemo(() => {
-    if (!currentUser) return null;
-    if (userLogs.length === 0) return SEASON_DATA.workouts[SEASON_DATA.sequence[0]];
+    if (!activeSeason) return null;
+    const lastWorkoutId = currentProgress?.lastWorkoutId;
+    const sequence = activeSeason.sequence;
+    if (!lastWorkoutId) return activeSeason.workouts[sequence[0]];
+    const idx = sequence.indexOf(lastWorkoutId);
+    const nextIdx = idx === -1 ? 0 : (idx + 1) % sequence.length;
+    return activeSeason.workouts[sequence[nextIdx]];
+  }, [activeSeason, currentProgress]);
 
-    const lastWorkout = userLogs[0].workoutId;
-    const lastIndex = SEASON_DATA.sequence.indexOf(lastWorkout);
-    const nextIndex = lastIndex === -1 ? 0 : (lastIndex + 1) % SEASON_DATA.sequence.length;
-    return SEASON_DATA.workouts[SEASON_DATA.sequence[nextIndex]];
-  }, [currentUser, userLogs]);
-
-  const handleLogin = (userId) => {
-    setCurrentUser(USERS[userId]);
-    setView('dashboard');
+  const handleLogin = () => {
+    setIsLoggedIn(true);
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setActiveSession(null);
-    setView('login');
-  };
-
-  const downloadData = () => {
-    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `roxborough_logs_${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const startSession = () => {
-    if (!currentUser || !nextWorkout) return;
-    const session = {
+  const handleStartSession = () => {
+    if (!activeSeason || !nextWorkout) return;
+    const sessionPayload = {
+      id: `session-${Date.now()}`,
+      profileId,
+      seasonId: activeSeason.id,
       workoutId: nextWorkout.id,
       startedAt: Date.now(),
+      entries: {},
     };
-    setActiveSession(session);
+    setActiveSession(sessionPayload);
+    setView('session');
+  };
+
+  const handleFinishSession = () => {
+    if (!activeSession) return;
     const newLog = {
-      id: logs.length + 1,
-      userId: currentUser.id,
-      workoutId: nextWorkout.id,
+      id: `log-${Date.now()}`,
+      profileId: activeSession.profileId,
+      seasonId: activeSession.seasonId,
+      workoutId: activeSession.workoutId,
       date: Date.now(),
-      summary: 'Sesión iniciada',
     };
-    setLogs([newLog, ...logs]);
+
+    setLogs((prev) => [newLog, ...prev]);
+    setProgress((prev) => ({
+      ...prev,
+      [activeSession.profileId]: {
+        lastWorkoutId: activeSession.workoutId,
+        lastSessionId: newLog.id,
+      },
+    }));
+    setActiveSession(null);
+    setView('today');
+  };
+
+  const updateStrengthSet = (itemId, setIndex, field, value) => {
+    setActiveSession((prev) => {
+      if (!prev) return prev;
+      const itemSets = prev.entries[itemId] || [];
+      const updated = [...itemSets];
+      updated[setIndex] = { ...updated[setIndex], [field]: value };
+      return { ...prev, entries: { ...prev.entries, [itemId]: updated } };
+    });
+  };
+
+  const updateCardioEntry = (itemId, field, value) => {
+    setActiveSession((prev) => {
+      if (!prev) return prev;
+      const updated = { ...(prev.entries[itemId] || {}) };
+      updated[field] = value;
+      return { ...prev, entries: { ...prev.entries, [itemId]: updated } };
+    });
+  };
+
+  const handleCreateSeason = () => {
+    const newSeason = {
+      id: `nueva-${Date.now()}`,
+      profileId,
+      title: `Temporada ${profileSeasons.length + 1}`,
+      active: profileSeasons.length === 0,
+      sequence: ['upper1', 'lower1', 'swim1'],
+      workouts: {
+        upper1: { id: 'upper1', name: 'Upper 1', items: [] },
+        lower1: { id: 'lower1', name: 'Lower 1', items: [] },
+        swim1: { id: 'swim1', name: 'Swim 1', items: [] },
+      },
+    };
+    setSeasons((prev) => [...prev, newSeason]);
+    setSelectedSeasonId(newSeason.id);
+  };
+
+  const handleActivateSeason = (seasonId) => {
+    setSeasons((prev) =>
+      prev.map((season) =>
+        season.profileId === profileId
+          ? { ...season, active: season.id === seasonId }
+          : season,
+      ),
+    );
   };
 
   const renderLogin = () => (
-    <div className="relative w-full h-full flex flex-col items-center justify-end pb-12 fade-in">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0">
-          <Image src={IMAGE_MAP.hero} alt="Roxborough" fill className="object-cover brightness-[0.4]" priority />
+    <div className="w-full min-h-screen flex items-center justify-center bg-[#0B0E14] px-6">
+      <div className="w-full max-w-md bg-[#151921] border border-[#2D3340] rounded-3xl p-8 space-y-6 shadow-2xl">
+        <div className="text-center space-y-2">
+          <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">Login compartido</p>
+          <h1 className="text-2xl font-bold">GYM app</h1>
+          <p className="text-sm text-slate-400">Un solo login, perfiles para Sergio y Scarlett.</p>
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/80 to-transparent" />
-      </div>
-
-      <div className="absolute top-4 right-4 z-50">
-        <a
-          href="https://vercel.com/new"
-          target="_blank"
-          rel="noreferrer"
-          className="bg-black/30 backdrop-blur border border-white/10 text-xs text-slate-300 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors flex items-center gap-1"
-        >
-          <span className="material-symbols-rounded text-sm">folder_zip</span>
-          Deploy en Vercel
-        </a>
-      </div>
-
-      <div className="relative z-10 w-full px-8 text-center mb-12">
-        <span className="inline-block p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 mb-6 shadow-xl">
-          <span className="material-symbols-rounded text-5xl text-rose-500">fitness_center</span>
-        </span>
-        <h1 className="text-4xl font-black text-white tracking-tight mb-2">Roxborough<br />Training Log</h1>
-        <p className="text-slate-400 font-medium text-sm mb-10">Selecciona tu perfil para comenzar</p>
-
-        <div className="space-y-4">
-          {Object.values(USERS).map((user) => (
-            <button
-              key={user.id}
-              onClick={() => handleLogin(user.id)}
-              className="w-full group relative overflow-hidden bg-[#151921] hover:bg-[#1E232E] border border-[#2D3340] p-1 rounded-2xl flex items-center transition-all active:scale-95"
-            >
-              <div className="w-16 h-16 rounded-xl overflow-hidden mr-4 bg-slate-800 shrink-0 relative">
-                <Image src={user.avatarUrl} alt={user.name} fill className="object-cover opacity-90 group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="text-left flex-1">
-                <h3 className="text-lg font-bold text-white">{user.name}</h3>
-                <p className="text-xs text-slate-500">Continuar Temporada</p>
-              </div>
-              <div className="pr-4">
-                <span className="material-symbols-rounded text-slate-600 group-hover:text-white transition-colors">chevron_right</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderDashboard = () => (
-    <div className="w-full min-h-full pb-32 pt-20 px-6 slide-up">
-      <div className="mb-6">
-        <p className="text-slate-400 text-sm font-medium">Hola, {currentUser?.name} 👋</p>
-        <h2 className="text-3xl font-bold text-white">¿Qué toca hoy?</h2>
-      </div>
-
-      {nextWorkout && (
-        <div
-          className="w-full relative aspect-[4/5] bg-[#151921] rounded-[2rem] overflow-hidden shadow-2xl shadow-black/50 border border-[#2D3340] mb-8 group cursor-pointer"
-          onClick={startSession}
-        >
-          <Image src={nextWorkout.img} alt={nextWorkout.name} fill className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/40 to-transparent" />
-
-          <div className="absolute bottom-0 left-0 w-full p-8">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2.5 py-1 bg-rose-500 text-white text-[10px] font-bold uppercase rounded-md tracking-wider shadow-lg shadow-rose-500/30">
-                Próximo
-              </span>
-              <span className="px-2.5 py-1 bg-white/20 backdrop-blur text-white text-[10px] font-bold uppercase rounded-md tracking-wider">
-                {nextWorkout.type}
-              </span>
-            </div>
-            <h3 className="text-4xl font-black text-white leading-[0.9] mb-2 tracking-tight">{nextWorkout.name}</h3>
-            <p className="text-slate-300 text-sm mb-6 truncate">{nextWorkout.exercises.join(' • ')}</p>
-
-            <button className="w-full py-4 bg-white hover:bg-slate-200 text-slate-900 font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl">
-              <span className="material-symbols-rounded filled">play_arrow</span> Iniciar Entrenamiento
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-[#151921] border border-[#2D3340] p-4 rounded-2xl">
-          <div className="flex items-center gap-2 mb-2 text-slate-400">
-            <span className="material-symbols-rounded text-lg">history</span>
-            <span className="text-xs font-bold uppercase">Último</span>
-          </div>
-          <p className="text-white font-bold text-sm leading-tight">
-            {userLogs[0] ? SEASON_DATA.workouts[userLogs[0].workoutId].name : 'N/A'}
-          </p>
-          <p className="text-[10px] text-slate-500 mt-1">{userLogs[0] ? formatDate(userLogs[0].date) : '-'}</p>
-        </div>
-        <div className="bg-[#151921] border border-[#2D3340] p-4 rounded-2xl">
-          <div className="flex items-center gap-2 mb-2 text-slate-400">
-            <span className="material-symbols-rounded text-lg">fitness_center</span>
-            <span className="text-xs font-bold uppercase">Sesión</span>
-          </div>
-          <p className="text-white font-bold text-xl">{activeSession ? 'Activa' : 'En pausa'}</p>
-          <p className="text-[10px] text-emerald-500 mt-1">{activeSession ? 'Seguimiento en curso' : 'Listo para empezar'}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderHistory = () => (
-    <div className="w-full min-h-full pb-32 pt-20 px-6 slide-up">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Historial</h2>
         <button
-          onClick={downloadData}
-          className="flex items-center gap-2 bg-[#1E232E] hover:bg-[#252b38] border border-[#2D3340] px-3 py-2 rounded-lg text-xs font-bold text-slate-300 transition-colors"
+          onClick={handleLogin}
+          className="w-full bg-rose-600 hover:bg-rose-500 transition text-white font-bold py-3 rounded-2xl"
         >
-          <span className="material-symbols-rounded text-base">download</span>
-          Exportar
+          Entrar
         </button>
       </div>
+    </div>
+  );
 
-      <div className="space-y-3">
-        {userLogs.length === 0 && (
-          <div className="text-center text-slate-500 bg-[#151921] border border-[#2D3340] rounded-2xl py-6">
-            Aún no hay sesiones registradas.
-          </div>
+  const renderHeader = () => (
+    <header className="sticky top-0 z-30 px-4 pt-6 pb-3 bg-[#0B0E14] flex items-center justify-between border-b border-[#151921]">
+      <div>
+        <p className="text-[11px] uppercase text-slate-500 font-semibold">Perfil</p>
+        <select
+          className="bg-[#151921] border border-[#2D3340] rounded-xl px-3 py-2 text-sm font-semibold text-white"
+          value={profileId}
+          onChange={(e) => {
+            setProfileId(e.target.value);
+            setSelectedSeasonId(null);
+          }}
+        >
+          {PROFILES.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="text-right">
+        <p className="text-[11px] uppercase text-slate-500 font-semibold">Temporada activa</p>
+        <p className="text-sm font-bold">{activeSeason ? activeSeason.title : 'Ninguna'}</p>
+        {activeSeason && (
+          <p className="text-[11px] text-slate-500">Orden B2: {activeSeason.sequence.join(' › ')}</p>
         )}
-        {userLogs.map((log) => (
-          <div
-            key={log.id}
-            className="bg-[#151921] border border-[#2D3340] p-4 rounded-2xl flex items-center justify-between"
-          >
-            <div>
-              <p className="text-sm text-slate-400">{formatDate(log.date)}</p>
-              <p className="text-white font-bold">{SEASON_DATA.workouts[log.workoutId].name}</p>
-              <p className="text-xs text-slate-500">{log.summary}</p>
-            </div>
-            <span className="material-symbols-rounded text-slate-500">chevron_right</span>
+      </div>
+    </header>
+  );
+
+  const renderHome = () => (
+    <div className="w-full min-h-full pb-28">
+      {renderHeader()}
+      <section className="px-4 pt-4 space-y-3">
+        <div className="bg-[#151921] border border-[#2D3340] rounded-2xl p-4">
+          <p className="text-xs text-slate-500 font-semibold">Siguiente workout</p>
+          <h2 className="text-xl font-bold mt-1">{nextWorkout ? nextWorkout.name : 'Activa una temporada'}</h2>
+          {nextWorkout && (
+            <p className="text-sm text-slate-400">B2 loop según último hecho</p>
+          )}
+        </div>
+
+        <div className="bg-[#151921] border border-[#2D3340] rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold">Items de hoy</h3>
+            <p className="text-xs text-slate-500">Ver solo lo esencial</p>
           </div>
-        ))}
+          {!nextWorkout && (
+            <p className="text-sm text-slate-500">Activa o crea una temporada para continuar.</p>
+          )}
+          {nextWorkout?.items.map((item, index) => (
+            <div key={item.id} className="py-2 border-t border-[#2D3340] first:border-t-0">
+              <p className="font-semibold">{index + 1}) {item.title}</p>
+              {item.type === 'strength' && (
+                <p className="text-sm text-slate-400">{item.sets} sets, {item.reps} reps</p>
+              )}
+              {item.type !== 'strength' && (
+                <p className="text-sm text-slate-400">
+                  {item.type === 'cardio' && 'Cardio'}
+                  {item.type === 'swim' && 'Swim'}
+                  {item.type === 'sauna' && 'Sauna'}: {item.target}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="fixed bottom-16 left-0 w-full px-4 safe-pb">
+        <button
+          className="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 rounded-2xl shadow-lg disabled:opacity-50"
+          disabled={!nextWorkout}
+          onClick={handleStartSession}
+        >
+          EMPEZAR SESIÓN
+        </button>
       </div>
     </div>
   );
 
-  const mainView = () => {
-    if (!currentUser) return renderLogin();
+  const renderSession = () => {
+    if (!activeSession || !activeSeason) return null;
+    const workout = activeSeason.workouts[activeSession.workoutId];
+
+    return (
+      <div className="w-full min-h-full pb-28">
+        <div className="sticky top-0 bg-[#0B0E14] px-4 pt-6 pb-4 border-b border-[#151921]">
+          <p className="text-xs text-slate-500">Sesión en curso</p>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold">{workout.name}</h2>
+            <span className="text-sm text-slate-400">Perfil: {profile.name}</span>
+          </div>
+        </div>
+
+        <div className="px-4 pt-4 space-y-4">
+          {workout.items.map((item) => (
+            <div key={item.id} className="bg-[#151921] border border-[#2D3340] rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold">{item.title}</h3>
+                {item.type === 'strength' && (
+                  <p className="text-xs text-slate-500">
+                    {item.sets} x {item.reps}
+                  </p>
+                )}
+              </div>
+
+              {item.type === 'strength' && (
+                <div className="space-y-2">
+                  {Array.from({ length: item.sets }).map((_, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        className="flex-1 bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                        placeholder="lb"
+                        value={activeSession.entries[item.id]?.[idx]?.weight || ''}
+                        onChange={(e) => updateStrengthSet(item.id, idx, 'weight', e.target.value)}
+                      />
+                      <input
+                        className="flex-1 bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                        placeholder="reps"
+                        value={activeSession.entries[item.id]?.[idx]?.reps || ''}
+                        onChange={(e) => updateStrengthSet(item.id, idx, 'reps', e.target.value)}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    className="text-sm text-rose-400 font-semibold"
+                    onClick={() =>
+                      updateStrengthSet(item.id, (activeSession.entries[item.id]?.length || item.sets) , 'weight', '')
+                    }
+                  >
+                    + Agregar set
+                  </button>
+                </div>
+              )}
+
+              {item.type === 'cardio' && (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                      placeholder="Minutos"
+                      value={activeSession.entries[item.id]?.minutes || ''}
+                      onChange={(e) => updateCardioEntry(item.id, 'minutes', e.target.value)}
+                    />
+                    <input
+                      className="flex-1 bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                      placeholder="Notas"
+                      value={activeSession.entries[item.id]?.notes || ''}
+                      onChange={(e) => updateCardioEntry(item.id, 'notes', e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {item.type === 'swim' && (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                      placeholder="Distancia"
+                      value={activeSession.entries[item.id]?.distance || ''}
+                      onChange={(e) => updateCardioEntry(item.id, 'distance', e.target.value)}
+                    />
+                    <input
+                      className="flex-1 bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                      placeholder="Minutos"
+                      value={activeSession.entries[item.id]?.minutes || ''}
+                      onChange={(e) => updateCardioEntry(item.id, 'minutes', e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {item.type === 'sauna' && (
+                <div className="space-y-2">
+                  <input
+                    className="w-full bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                    placeholder="Minutos"
+                    value={activeSession.entries[item.id]?.minutes || ''}
+                    onChange={(e) => updateCardioEntry(item.id, 'minutes', e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="fixed bottom-16 left-0 w-full px-4 safe-pb">
+          <button
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg"
+            onClick={handleFinishSession}
+          >
+            TERMINAR Y GUARDAR
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSeasons = () => (
+    <div className="w-full min-h-full pb-24">
+      {renderHeader()}
+      <section className="px-4 pt-4 space-y-4">
+        <div className="bg-[#151921] border border-[#2D3340] rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Temporadas</h2>
+            <button
+              className="text-rose-400 font-semibold text-sm"
+              onClick={handleCreateSeason}
+            >
+              + Crear temporada
+            </button>
+          </div>
+          <div className="mt-3 space-y-3">
+            {profileSeasons.map((season) => (
+              <div
+                key={season.id}
+                className="flex items-start justify-between border border-[#2D3340] rounded-xl p-3"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      checked={season.active}
+                      onChange={() => handleActivateSeason(season.id)}
+                    />
+                    <p className="font-semibold">{season.title}</p>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Orden B2: {season.sequence.join(' › ')}</p>
+                  <button
+                    className="text-xs text-rose-400 mt-2 font-semibold"
+                    onClick={() => setSelectedSeasonId(season.id)}
+                  >
+                    Abrir
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {selectedSeasonId && (
+          <SeasonDetail
+            season={seasons.find((s) => s.id === selectedSeasonId)}
+            onClose={() => setSelectedSeasonId(null)}
+          />
+        )}
+      </section>
+    </div>
+  );
+
+  const renderHistory = () => {
+    const seasonOptions = profileSeasons.filter((s) => s.active || s.id);
+    const activeFilter = selectedSeasonId || seasonOptions[0]?.id;
+    const filteredLogs = logs
+      .filter((log) => log.profileId === profileId)
+      .filter((log) => !activeFilter || log.seasonId === activeFilter)
+      .sort((a, b) => b.date - a.date);
+
+    return (
+      <div className="w-full min-h-full pb-24">
+        {renderHeader()}
+        <section className="px-4 pt-4 space-y-4">
+          <div className="bg-[#151921] border border-[#2D3340] rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold">Historial</h2>
+              <div className="text-right">
+                <p className="text-[10px] uppercase text-slate-500 font-semibold">Temporada</p>
+                <select
+                  className="bg-[#0B0E14] border border-[#2D3340] rounded-lg px-3 py-2 text-sm"
+                  value={activeFilter}
+                  onChange={(e) => setSelectedSeasonId(e.target.value)}
+                >
+                  {seasonOptions.map((season) => (
+                    <option key={season.id} value={season.id}>
+                      {season.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {filteredLogs.length === 0 && (
+                <p className="text-sm text-slate-500">No hay sesiones registradas aún.</p>
+              )}
+              {filteredLogs.map((log) => {
+                const season = seasons.find((s) => s.id === log.seasonId);
+                const workout = season?.workouts[log.workoutId];
+                return (
+                  <div
+                    key={log.id}
+                    className="flex items-center justify-between border border-[#2D3340] rounded-xl p-3"
+                  >
+                    <div>
+                      <p className="text-xs text-slate-500">{formatDate(log.date)}</p>
+                      <p className="font-semibold">{workout?.name || 'Workout'}</p>
+                      <p className="text-xs text-slate-500">{season?.title}</p>
+                    </div>
+                    <span className="material-symbols-rounded text-slate-500">chevron_right</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    if (!isLoggedIn) return renderLogin();
+    if (view === 'session') return renderSession();
+    if (view === 'seasons') return renderSeasons();
     if (view === 'history') return renderHistory();
-    return renderDashboard();
+    return renderHome();
   };
 
   return (
-    <div className="w-full min-h-screen flex justify-center">
-      <div className="w-full max-w-md h-screen flex flex-col relative bg-[#0B0E14] shadow-2xl">
-        {currentUser && (
-          <header className="absolute top-0 left-0 w-full z-50 p-4 pt-6 flex justify-between items-center bg-gradient-to-b from-[#0B0E14] to-transparent">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center">
-                <span className="material-symbols-rounded text-sm">calendar_month</span>
-              </div>
-              <div>
-                <h1 className="text-xs text-slate-400 font-medium uppercase tracking-wider">Temporada</h1>
-                <p className="text-sm font-bold text-white leading-none">{SEASON_DATA.title}</p>
-              </div>
-            </div>
-            <button
-              className="w-8 h-8 rounded-full bg-[#151921] border border-[#2D3340] flex items-center justify-center active:scale-95 transition hover:bg-slate-800"
-              onClick={handleLogout}
-            >
-              <span className="material-symbols-rounded text-slate-400 text-sm">logout</span>
-            </button>
-          </header>
-        )}
+    <div className="w-full min-h-screen flex justify-center bg-[#0B0E14] text-white">
+      <div className="w-full max-w-md min-h-screen relative">
+        {renderContent()}
 
-        <main className="flex-1 overflow-y-auto no-scrollbar relative scroll-smooth bg-[#0B0E14]">
-          {mainView()}
-        </main>
-
-        {currentUser && (
-          <nav className="absolute bottom-0 w-full glass safe-pb pt-2 z-40">
+        {isLoggedIn && view !== 'session' && (
+          <nav className="fixed bottom-0 left-0 w-full glass safe-pb pt-2 z-40">
             <div className="flex justify-around items-center h-14">
               <button
-                className={`nav-btn group flex flex-col items-center gap-1 w-1/3 ${view === 'dashboard' ? 'text-rose-500' : 'text-slate-500'}`}
-                onClick={() => setView('dashboard')}
+                className={`nav-btn group flex flex-col items-center gap-1 w-1/3 ${view === 'today' ? 'text-rose-500' : 'text-slate-500'}`}
+                onClick={() => setView('today')}
               >
-                <span className="material-symbols-rounded text-2xl group-active:scale-90 transition">dashboard</span>
+                <span className="material-symbols-rounded text-2xl group-active:scale-90 transition">event</span>
                 <span className="text-[10px] font-medium">Hoy</span>
               </button>
               <button
-                className="nav-btn -mt-8 bg-rose-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg shadow-rose-600/30 text-white active:scale-90 transition active:bg-rose-500"
-                onClick={startSession}
+                className={`nav-btn group flex flex-col items-center gap-1 w-1/3 ${view === 'seasons' ? 'text-rose-500' : 'text-slate-500'}`}
+                onClick={() => setView('seasons')}
               >
-                <span className="material-symbols-rounded text-3xl">play_arrow</span>
+                <span className="material-symbols-rounded text-2xl group-active:scale-90 transition">calendar_month</span>
+                <span className="text-[10px] font-medium">Temporadas</span>
               </button>
               <button
                 className={`nav-btn group flex flex-col items-center gap-1 w-1/3 ${view === 'history' ? 'text-rose-500' : 'text-slate-500'}`}
@@ -339,6 +580,44 @@ export default function HomePage() {
             </div>
           </nav>
         )}
+      </div>
+    </div>
+  );
+}
+
+function SeasonDetail({ season, onClose }) {
+  if (!season) return null;
+
+  return (
+    <div className="bg-[#151921] border border-[#2D3340] rounded-2xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="text-[11px] uppercase text-slate-500 font-semibold">Temporada</p>
+          <h3 className="text-lg font-bold">{season.title}</h3>
+        </div>
+        <button className="text-xs text-slate-400" onClick={onClose}>
+          Cerrar
+        </button>
+      </div>
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold">Workouts (orden B2)</h4>
+        {season.sequence.map((workoutId, idx) => {
+          const workout = season.workouts[workoutId];
+          return (
+            <div
+              key={workoutId}
+              className="border border-[#2D3340] rounded-xl p-3 flex items-center justify-between"
+            >
+              <div>
+                <p className="text-xs text-slate-500">{idx + 1}.</p>
+                <p className="font-semibold">{workout?.name}</p>
+                <p className="text-xs text-slate-500">{workout?.items.length || 0} items</p>
+              </div>
+              <button className="text-xs text-rose-400 font-semibold">Editar</button>
+            </div>
+          );
+        })}
+        <button className="text-rose-400 font-semibold text-sm">+ Agregar workout</button>
       </div>
     </div>
   );
